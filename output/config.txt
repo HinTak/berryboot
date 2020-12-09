@@ -22,11 +22,15 @@ dtoverlay=vc4-fkms-v3d
 kernel=kernel_rpi0123_aufs.img
 
 [pi3]
-# 64-bit stuff for Pi 3
-kernel=kernel_rpi64.img
-arm_64bit=1
+# 32-bit kernel
+kernel=kernel_rpi0123_aufs.img
+## 64-bit stuff for Pi 3
+#kernel=kernel_rpi64.img
+#arm_64bit=1
 
 [pi4]
-# 64-bit stuff for Pi 4
-kernel=kernel_rpi64.img
-arm_64bit=1
+# 32-bit kernel
+kernel=kernel_rpi0123_aufs.img
+## 64-bit stuff for Pi 4
+#kernel=kernel_rpi64.img
+#arm_64bit=1
