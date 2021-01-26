@@ -19,18 +19,18 @@ dtoverlay=sdtweak,poll_once
 dtoverlay=vc4-fkms-v3d
 
 # 32-bit kernel for Pi 0 1 2
-kernel=kernel_rpi0123_aufs.img
+kernel=kernel_rpi4.img
 
 [pi3]
 # 32-bit kernel
-kernel=kernel_rpi0123_aufs.img
+kernel=kernel_rpi4.img
 ## 64-bit stuff for Pi 3
 #kernel=kernel_rpi64.img
 #arm_64bit=1
 
 [pi4]
 # 32-bit kernel
-kernel=kernel_rpi0123_aufs.img
+kernel=kernel_rpi4.img
 ## 64-bit stuff for Pi 4
 #kernel=kernel_rpi64.img
 #arm_64bit=1
