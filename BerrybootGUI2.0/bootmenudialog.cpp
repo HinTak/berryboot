@@ -465,8 +465,6 @@ void BootMenuDialog::reconfigureLocale()
 
 void BootMenuDialog::startISCSI()
 {
-    mountSystemPartition();
-
     if (!QFile::exists("/sys/module/iscsi_tcp"))
     {
         loadModule("iscsi_tcp");
@@ -483,6 +481,7 @@ void BootMenuDialog::startISCSI()
     }
 
     int tries = 1, delay = 5;
+    mountSystemPartition();
 
     while (true)
     {
