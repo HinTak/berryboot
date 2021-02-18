@@ -498,11 +498,28 @@ void BootMenuDialog::startISCSI()
         /* Wait a while and try again */
         qpd.setLabelText(tr("Connecting to iSCSI SAN failed. Try # %1. Retrying in %2 seconds.")
                          .arg(QString::number(tries), QString::number(delay)));
+        qpd.show();
         processEventSleep(delay * 1000);
         tries++; delay = qMin(delay * 2, 300);
     }
 
     umountSystemPartition();
+
+    qpd.setLabelText(tr("Waiting for the iSCSI block device..."));
+    qpd.show();
+    QTime t;
+    t.start();
+    while (t.elapsed() < 20000)
+    {
+        QApplication::processEvents(QEventLoop::WaitForMoreEvents, 250);
+        if (!_i->iscsiDevice().toLatin1().isEmpty())
+            break;
+    }
+    if (_i->iscsiDevice().toLatin1().isEmpty())
+    {
+        QMessageBox::critical(this, tr("iSCSI block device error"), tr("A timeout occurred whilst waiting for the iSCSI block device"), QMessageBox::Ok);
+    }
+    qpd.hide();
 
     /* Detect data partition */
     QByteArray iscsiDevice = "/dev/"+_i->iscsiDevice().toLatin1();

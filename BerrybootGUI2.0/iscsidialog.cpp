@@ -34,6 +34,8 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QTimer>
+#include <QTime>
+#include <QDir>
 
 iSCSIDialog::iSCSIDialog(Installer *i, QWidget *parent) :
     QDialog(parent),
@@ -78,6 +80,9 @@ void iSCSIDialog::accept()
     connect(&proc, SIGNAL(finished(int)), &qpd, SLOT(close()));
     connect(&timer, SIGNAL(timeout()), &proc, SLOT(kill()));
 
+    /* Get the number of block devices before iSCSI starts */
+    int preBlockDeviceCount = countBlockDevices();
+
     // TODO: properly escape characters
     QString cmd = "/sbin/iscsistart -i \""+ui->initiatorEdit->text()+"\""+" -g 1 -t \""+ui->targetEdit->text()+"\" -a \""+ui->serverEdit->text()+"\"";
     if ( !ui->passEdit->text().isEmpty() )
@@ -97,6 +102,27 @@ void iSCSIDialog::accept()
     }
     timer.stop();
 
+    /* Wait until more block devices have been created by iSCSI starting */
+    qpd.setLabelText(tr("Waiting for the iSCSI device files to be created..."));
+    qpd.show();
+    bool foundDevice = false;
+    QTime t;
+    t.start();
+    while (t.elapsed() < 20000)
+    {
+        if (countBlockDevices() > preBlockDeviceCount)
+        {
+            foundDevice = true;
+            break;
+        }
+        QApplication::processEvents(QEventLoop::WaitForMoreEvents, 250);
+    }
+    qpd.hide();
+    if (!foundDevice)
+    {
+        QMessageBox::critical(this, tr("Timeout"), tr("There was a timeout waiting for the iSCSI block devices to be created"), QMessageBox::Close);
+    }
+
     QFile f("/boot/iscsi.sh");
     f.open(f.WriteOnly);
     f.write(cmd.toLatin1());
@@ -109,4 +135,10 @@ void iSCSIDialog::onNetworkSettings()
 {
     NetworkSettingsDialog ns(_i, this);
     ns.exec();
+}
+
+int iSCSIDialog::countBlockDevices()
+{
+    QDir    dir("/sys/class/block");
+    return dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot).count();
 }

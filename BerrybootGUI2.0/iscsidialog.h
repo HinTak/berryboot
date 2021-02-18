@@ -48,6 +48,10 @@ protected:
     Installer *_i;
 
     virtual void accept();
+    /*
+     * Return the number of block devices in /sys/class/block
+     */
+    int countBlockDevices();
 
 protected slots:
     void onNetworkSettings();

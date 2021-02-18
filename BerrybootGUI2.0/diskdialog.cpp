@@ -35,6 +35,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QMessageBox>
 #include <QSettings>
 #include <unistd.h>
+#include <blkid/blkid.h>
 
 DiskDialog::DiskDialog(Installer *i, QWidget *parent) :
     QDialog(parent),
@@ -249,10 +250,22 @@ bool DiskDialog::hasExistingBerryboot(const QString &drive)
     bool existingBerryboot = false;
 
     QString p = drive;
-    if (p.startsWith("sd") || p.startsWith("hd"))
-        p += "2";
-    else
-        p += "p2";
+    if (p.startsWith("iscsi"))
+    {
+        QByteArray bb = "berryboot";
+        QByteArray d = getDeviceByLabel(bb);
+        /* p will contain /dev/sd?? */
+        p = QString(d);
+        /* Delete the leading /dev/ */
+        p.remove(0,5);
+    } else {
+        if (p.startsWith("sd") || p.startsWith("hd"))
+        {
+            p += "2";
+        } else {
+            p += "p2";
+        }
+    }
 
     QProcess proc;
     proc.start("/sbin/blkid /dev/"+p);
@@ -290,3 +303,18 @@ bool DiskDialog::usbBoot()
 {
     return _usbboot;
 }
+
+QByteArray DiskDialog::getDeviceByLabel(const QByteArray &label)
+{
+    QByteArray dev;
+    char *cstr = blkid_get_devname(NULL, "LABEL", label.constData());
+
+    if (cstr)
+    {
+        dev = cstr;
+        free(cstr);
+    }
+
+    return dev;
+}
+

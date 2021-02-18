@@ -58,6 +58,11 @@ protected:
      */
     bool hasExistingBerryboot(const QString &drive);
 
+    /*
+     * Get a device name from its label
+     */
+     QByteArray getDeviceByLabel(const QByteArray &label);
+
 protected slots:
     /*
      * Populate GUI widget with available drives
